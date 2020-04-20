@@ -19,7 +19,34 @@ public class Movement : MonoBehaviour {
     public float jumpforce = 1f;
 
     public float Jumptimer = 0;
+    public float ColliderX = 0.1f; 
+    public float Collidery = 0.2f;
+
+    public Vector2 PreviousPos = Vector2.zero;
+    public Vector2 CurrentPos = Vector2.zero;
+
+
+    public int CurrentX = 0;
+    public int CurrentY = 0;
+
+    private void Start() {
+        positionX = (int)(transform.position.x * 4);
+        positionY = (int)(transform.position.y * 4);
+        Debug.Log(positionX + " | " + transform.position.x + " | " + (transform.position.x * 4) + " | " + ((int)(transform.position.x * 4)));
+        Debug.Log(positionY + " | " + transform.position.y + " | " + (transform.position.y * 4) + " | " + ((int)(transform.position.y * 4)));
+
+    }
+
+    public void SetNodeType(Vector3 position, int type) {
+        collisions.SetNode((int)(position.x * 4), (int)(position.y * 4), type);
+    }
+
+
     private void Update() {
+
+
+
+
 
 
         if (_enableA == true) {
@@ -36,15 +63,15 @@ public class Movement : MonoBehaviour {
             }
         }
         if (_enableJump == true) {
-            if (Input.GetKey(KeyCode.W)) {
+            if (Input.GetKey(KeyCode.Space)) {
                 Jumptimer += Time.deltaTime;
                 if (Jumptimer >= 0.3f) {
                     Jumptimer = 0;
 
                     _enableJump = false;
+                    gravity = true;
                     MovementVectors.y = 0;
                     MovementVectors += Vector3.up * jumpforce;
-                    gravity = true;
                 }
             }
         }
@@ -72,94 +99,272 @@ public class Movement : MonoBehaviour {
 
         }
 
-        if ((int)transform.position.y != positionY) {
+
+
+
+        CurrentX = (int)(transform.position.x * 4);
+        CurrentY = (int)(transform.position.y * 4);
+
+
+        if (CurrentY != positionY) {
             Debug.Log("JHE");
+
+            if(collisions.nodes[positionX, positionY].type != collisions.nodes[positionX, CurrentY].type) {
+
+
             collisions.nodes[positionX, positionY].OnExit(this);
-            collisions.nodes[positionX, (int)transform.position.y].OnEnter(this);
+            collisions.nodes[positionX, CurrentY].OnEnter(this);
 
+            }
 
-            if ((int)transform.position.y < positionY) {
-                if (collisions.nodes[positionX, (int)transform.position.y].type != 0) {
-                    transform.position = (Vector3.right * transform.position.x) + (Vector3.up * ((int)transform.position.y + (1 * 0.99f)));
+     /*       if (CurrentY < positionY) {
+                if (collisions.nodes[positionX, CurrentY].type != 0) {
+                    transform.position = (Vector3.right * transform.position.x) + (Vector3.up * (CurrentY + (1 * 0.99f)));
                 }
             } else {
              
-                if (collisions.nodes[positionX, (int)transform.position.y].type != 0) {
-                    transform.position = (Vector3.right * transform.position.x) + (Vector3.up * ((int)transform.position.y + (0.01f)));
+                if (collisions.nodes[positionX, CurrentY].type != 0) {
+                    transform.position = (Vector3.right * transform.position.x) + (Vector3.up * (CurrentY + (0.01f)));
+
+                }
+            }*/
+        }
+
+        if (CurrentX != positionX) {
+            if (collisions.nodes[positionX, positionY].type != collisions.nodes[CurrentX, positionY].type) {
+
+                collisions.nodes[positionX, positionY].OnExit(this);
+                collisions.nodes[CurrentX, positionY].OnEnter(this);
+
+            }
+         /*   if (collisions.nodes[CurrentX, positionY].type != 0) {
+                if (CurrentX < positionX)
+                    transform.position = (Vector3.right * (CurrentX + (0.99f))) + (Vector3.up * transform.position.y);
+                else
+                    transform.position = (Vector3.right * (CurrentX + (0.01f))) + (Vector3.up * transform.position.y);
+            }*/
+        }
+
+
+        positionX = CurrentX;
+        positionY = CurrentY;
+
+    }
+
+  
+
+
+
+
+
+
+
+
+    public float inX = 0;
+    public float inY = 0;
+    public Vector2 movementvector = Vector2.zero;
+
+    public void PushOutOfNode(Node n) {
+
+
+        //but ok, lets just try to push out.
+
+        if((CurrentPos - PreviousPos).y > 0) {
+            if(PreviousPos.y + Collidery > n.y) {
+
+
+
+
+                CurrentPos.y = PreviousPos.y + Collidery;
+            } else {
+
+                if ((CurrentPos - PreviousPos).x < 0) {
+                    CurrentPos.x = PreviousPos.x + ColliderX;
+                } else {
 
                 }
             }
-        }
 
-        if ((int)transform.position.x != positionX) {
-            collisions.nodes[positionX, positionY].OnExit(this);
-            collisions.nodes[(int)transform.position.x, positionY].OnEnter(this);
-
-            if (collisions.nodes[(int)transform.position.x, positionY].type != 0) {
-                if ((int)transform.position.x < positionX)
-                    transform.position = (Vector3.right * ((int)transform.position.x + (0.99f))) + (Vector3.up * transform.position.y);
-                else
-                    transform.position = (Vector3.right * ((int)transform.position.x + (0.01f))) + (Vector3.up * transform.position.y);
-            }
         }
 
 
-        positionY = (int)transform.position.y;
-        positionX = (int)transform.position.x;
+
+
+
+
+
+
+        if (PreviousPos.x < n.x + 0.5f) {
+        }
+
+
+
+
+
 
     }
 
 
 
-    public void OnExitGround() {
-        Debug.Log("EXITONGROUND");
-        _enableS = true;
-    }
-    public void OnEnterGround() {
-        Debug.Log("ENTER Ground");
-        _enableS = false;
+    public void OnExitZero() {
+        Debug.Log("EXit Air");
         gravity = false;
-        _enableJump = true;
         MovementVectors = Vector3.zero;
 
-    }
-    public void OnExitClimb() {
-        Debug.Log("exit CLIMB");
-        _enableD = true;
-        _enableW = false;
-        gravity = true;
-        MovementVectors = Vector3.zero;
-        _enableJump = true;
-
-    }
-    public void OnEnterClimb() {
-        Debug.Log("ENTER CLUMB");
-        _enableD = false;
         _enableW = true;
-        _enableJump = false;
-        gravity = false;
-        MovementVectors = Vector3.zero;
+        _enableS = true;
 
     }
-    public void OnExitRoofClimb() {
-        Debug.Log("Roof cliumb Exit");
-        gravity = true;
+    public void OnExitOne() {
+        Debug.Log("EXit Wall");
+        //hmmmm, TODO
+
+    }
+    public void OnExitTwo() {
+        Debug.Log("EXit Ground");
+
+        _enableS = true;
+        _enableW = true;
+
+    }
+    public void OnExitThree() {
+        Debug.Log("EXit ClimbWallRight");
+        _enableA = true;
         _enableJump = true;
+
+
+    }
+    public void OnExitFour() {
+        Debug.Log("EXit ClimbWallLeft");
+        _enableD = true;
+        _enableJump = true;
+
+
+    }
+    public void OnExitFive() {
+        Debug.Log("EXit ClimbCeiling");
+        _enableW = true;
+        _enableJump = true;
+    }
+    public void OnExitSix() {
+        Debug.Log("EXit GroundToClimb");
+        _enableW = true;
+
+    }
+    public void OnExitSeven() {
+        Debug.Log("EXit ClimbSideToClimbCeiling");
+        _enableJump = true;
+
+    }
+
+
+
+    public void OnEnterZero() {
+        Debug.Log("Enter Air");
+        gravity = true;
         _enableW = false;
         _enableS = false;
-        MovementVectors = Vector3.zero;
 
     }
-    public void OnEnterRoofClumb() {
-        Debug.Log("ENTER RoofCllumb");
-        _enableJump = false;
+    public void OnEnterOne() {
+        Debug.Log("Enter Wall");
+        //hmmmm, TODO
+    }
+    public void OnEnterTwo() {
+        Debug.Log("Enter Ground");
+
+        _enableS = false;
         _enableW = false;
-        _enableS = true;
-        gravity = false;
-        MovementVectors = Vector3.zero;
-        
+        _enableJump = true;
+
+    }
+    public void OnEnterThree() {
+        Debug.Log("Enter ClimbWallRight");
+        _enableA = false;
+        _enableJump = false;
+
+    }
+    public void OnEnterFour() {
+        Debug.Log("Enter ClimbWallLeft");
+        _enableD = false;
+        _enableJump = false;
+
+    }
+    public void OnEnterFive() {
+        Debug.Log("Enter ClimbCeiling");
+
+        _enableW = false;
+        _enableJump = false;
+
+    }
+    public void OnEnterSix() {
+        Debug.Log("Enter GroundToClimb");
+        _enableW = false;
+        _enableJump = true;
+    
+    }
+    
+    public void OnEnterSeven() {
+        Debug.Log("Enter ClimbSideToClimbCeiling");
+        _enableJump = false;
+
     }
 
+
+
+
+
+
+    /*
+        public void OnExitGround() {
+            Debug.Log("EXITONGROUND");
+            _enableS = true;
+        }
+        public void OnEnterGround() {
+            Debug.Log("ENTER Ground");
+            _enableS = false;
+            gravity = false;
+            _enableJump = true;
+            MovementVectors = Vector3.zero;
+
+        }
+        public void OnExitClimb() {
+            Debug.Log("exit CLIMB");
+            _enableD = true;
+            _enableW = false;
+            gravity = true;
+            MovementVectors = Vector3.zero;
+            _enableJump = true;
+
+        }
+        public void OnEnterClimb() {
+            Debug.Log("ENTER CLUMB");
+            _enableD = false;
+            _enableW = true;
+            _enableJump = false;
+            gravity = false;
+            MovementVectors = Vector3.zero;
+
+        }
+        public void OnExitRoofClimb() {
+            Debug.Log("Roof cliumb Exit");
+            gravity = true;
+            _enableJump = true;
+            _enableW = false;
+            _enableS = false;
+            MovementVectors = Vector3.zero;
+
+        }
+        public void OnEnterRoofClumb() {
+            Debug.Log("ENTER RoofCllumb");
+            _enableJump = false;
+            _enableW = false;
+            _enableS = true;
+            gravity = false;
+            MovementVectors = Vector3.zero;
+
+        }
+        */
 
 
 
@@ -168,6 +373,7 @@ public class Movement : MonoBehaviour {
 
 
 }
+
 /*
 public class Movement : MonoBehaviour {
 

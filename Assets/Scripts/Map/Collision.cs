@@ -4,48 +4,68 @@ using UnityEngine;
 
 public class Collision : MonoBehaviour {
 
-    public Node[,] nodes = new Node[10, 10];
+    public Node[,] nodes = new Node[40, 40];
 
     private void Start() {
 
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 40; j++) {
                 nodes[i, j] = new Node();
                 nodes[i, j].type = 0;
+                nodes[i, j].x = i;
+                nodes[i, j].y = j;
             }
         }
 
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 1; j++) {
+   /*     for (int i = 16; i < 24; i++) {
+            for (int j = 16; j < 24; j++) {
                 nodes[i, j].type = 1;
             }
         }
 
-        for (int i = 9; i < 10; i++) {
-            for (int j = 1; j < 9; j++) {
-                nodes[i, j].type = 2;
+
+        for (int i = 16; i < 24; i++) {
+            for (int j = 23; j < 24; j++) {
+                    nodes[i, j].type = 2;
+            }
+        }
+        for (int i = 23; i < 24; i++) {
+            for (int j = 16; j < 24; j++) {
+                    nodes[i, j].type = 3;
+            }
+        }
+        for (int i = 16; i < 17; i++) {
+            for (int j = 16; j < 24; j++) {
+                    nodes[i, j].type = 4;
+            }
+        }
+        for (int i = 16; i < 24; i++) {
+            for (int j = 16; j < 17; j++) {
+                    nodes[i, j].type = 5;
             }
         }
 
-        for (int i = 0; i < 10; i++) {
-            for (int j = 7; j < 8; j++) {
-                nodes[i, j].type = 4;
-            }
-        }
+        nodes[16, 23].type = 6;
+        nodes[23, 23].type = 6;
+        nodes[16, 16].type = 7;
+        nodes[23, 16].type = 7;
+        */
+    }
 
-       
-
-        nodes[9, 0].type = 3;
-
+    public void SetNode(int x, int y, int type) {
+        nodes[x,y].type = type;
 
     }
+
+
+
 
     public bool Draw = false;
     private void OnDrawGizmos() {
         if (Draw == true) {
 
-            for (int i = 0; i < 10; i++) {
-                for (int j = 0; j < 10; j++) {
+            for (int i = 0; i < 40; i++) {
+                for (int j = 0; j < 40; j++) {
                     if (nodes[i, j].type == 0) {
                         Gizmos.color = Color.blue;
 
@@ -58,15 +78,27 @@ public class Collision : MonoBehaviour {
                         Gizmos.color = Color.green;
 
                     }
+                    if (nodes[i, j].type == 3) {
+                        Gizmos.color = Color.grey;
+
+                    }
                     if (nodes[i, j].type == 4) {
                         Gizmos.color = Color.yellow;
 
                     }
-                    if (nodes[i, j].type == 2) {
-                        Gizmos.color = Color.grey;
+                    if (nodes[i, j].type == 5) {
+                        Gizmos.color = Color.magenta;
 
                     }
-                    Gizmos.DrawSphere((Vector3.right * i) + (Vector3.up * j) + (Vector3.one * 0.5f), 0.25f);
+                    if (nodes[i, j].type == 6) {
+                        Gizmos.color = Color.black;
+
+                    }
+                    if (nodes[i, j].type == 7) {
+                        Gizmos.color = Color.white;
+
+                    }
+                    Gizmos.DrawSphere((Vector3.right * (i * 0.25f)) + (Vector3.up * (j * 0.25f)) + (Vector3.one * (0.25f * 0.5f)), 0.05f);
 
                 }
             }
@@ -77,35 +109,63 @@ public class Collision : MonoBehaviour {
 
 public class Node {
 
-
-
-
-    public int type = 0;
-    public void OnExit(Movement m) {
-        if (type == 1)
-            m.OnExitGround();
-        if (type == 2)
-            m.OnExitClimb();
-        if (type == 3) {
-            m.OnExitClimb();
-            m.OnExitGround();
-        }
-        if (type == 4) {
-            m.OnExitRoofClimb();
+    public void OnPushOut(Movement m) {
+        if(type != 0) {
+            m.PushOutOfNode(this);
         }
     }
 
-    public void OnEnter(Movement m) {
+
+    public int type = 0;
+    public int x = 0;
+    public int y = 0;
+
+    public void OnExit(Movement m) {
+       if(type == 0)
+            m.OnExitZero();
         if (type == 1)
-            m.OnEnterGround();
+            m.OnExitOne();
         if (type == 2)
-            m.OnEnterClimb();
+            m.OnExitTwo();
         if (type == 3) {
-            m.OnEnterGround();
-            m.OnEnterClimb();
+            m.OnExitThree();
         }
         if (type == 4) {
-            m.OnEnterRoofClumb();
+            m.OnExitFour();
+        }
+        if (type == 5) {
+            m.OnExitFive();
+        }
+        if (type == 6) {
+            m.OnExitSix();
+        }
+        if (type == 7) {
+            m.OnExitSeven();
+        }
+
+    }
+
+    public void OnEnter(Movement m) {
+        if (type == 0)
+            m.OnEnterZero();
+        if (type == 1)
+            m.OnEnterOne();
+        if (type == 2)
+            m.OnEnterTwo();
+        if (type == 3) {
+            m.OnEnterThree();
+        }
+        if (type == 4) {
+            m.OnEnterFour();
+        }
+        if (type == 5) {
+            m.OnEnterFive();
+        }
+        if (type == 6) {
+            m.OnEnterSix();
+        }
+        if (type == 7) {
+            m.OnEnterSeven();
         }
     }
 
